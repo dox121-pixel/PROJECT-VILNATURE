@@ -1,0 +1,45 @@
+{
+    "name": "PROJECT-VILNATURE — UE5 Dev Environment",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
+    "features": {
+        "ghcr.io/devcontainers/features/python:1": { "version": "3.11" },
+        "ghcr.io/devcontainers/features/node:1":   { "version": "lts" },
+        "ghcr.io/devcontainers/features/git-lfs:1": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    },
+    "postCreateCommand": "pip install -r Tools/requirements.txt",
+    "mounts": [],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "GitHub.copilot",
+                "GitHub.copilot-chat",
+                "ms-vscode.cpptools",
+                "ms-vscode.cmake-tools",
+                "ms-python.python",
+                "ms-python.pylance",
+                "eamodio.gitlens",
+                "ms-vscode.live-server"
+            ],
+            "settings": {
+                "editor.formatOnSave": true,
+                "python.defaultInterpreterPath": "/usr/local/bin/python3",
+                "C_Cpp.default.cppStandard": "c++17",
+                "files.associations": {
+                    "*.uasset": "binary",
+                    "*.umap": "binary"
+                },
+                "github.copilot.enable": {
+                    "*": true
+                }
+            }
+        }
+    },
+    "remoteEnv": {
+        "VILNATURE_ROOT": "${containerWorkspaceFolder}"
+    },
+    "forwardPorts": [8080],
+    "portsAttributes": {
+        "8080": { "label": "Asset Pipeline Server", "onAutoForward": "notify" }
+    }
+}

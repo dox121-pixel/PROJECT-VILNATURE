@@ -1,0 +1,110 @@
+name: UE5 Build & Package
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+env:
+  UE5_ROOT: /home/ue5/UnrealEngine
+  PROJECT_NAME: VilNature
+  PROJECT_FILE: VilNature.uproject
+
+jobs:
+  # ─── Validate assets before building ─────────────────────────────────────────
+  validate-assets:
+    name: Asset Validation
+    runs-on: self-hosted
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install validation deps
+        run: pip install -r Tools/requirements.txt
+      - name: Run texture / mesh validator
+        run: python Tools/texture_validator.py --strict
+
+  # ─── Compile C++ source ───────────────────────────────────────────────────────
+  build:
+    name: UE5 Compile (${{ matrix.platform }})
+    needs: validate-assets
+    runs-on: self-hosted
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        platform: [ Win64, Linux ]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Generate project files
+        run: |
+          $UE5_ROOT/Engine/Build/BatchFiles/GenerateProjectFiles.sh \
+            -project="$GITHUB_WORKSPACE/$PROJECT_FILE" \
+            -game -engine
+        shell: bash
+
+      - name: Compile — Development Editor
+        run: |
+          $UE5_ROOT/Engine/Build/BatchFiles/RunUBT.sh \
+            ${PROJECT_NAME}Editor \
+            ${{ matrix.platform }} \
+            Development \
+            -Project="$GITHUB_WORKSPACE/$PROJECT_FILE" \
+            -WaitMutex \
+            -FromMsBuild
+        shell: bash
+
+  # ─── Cook & package (only on release tags) ────────────────────────────────────
+  package:
+    name: Cook & Package (${{ matrix.platform }})
+    needs: build
+    if: github.event_name == 'release'
+    runs-on: self-hosted
+    permissions:
+      contents: write   # needed to attach artifacts to releases
+    strategy:
+      matrix:
+        platform: [ Win64, Linux ]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Cook content
+        run: |
+          $UE5_ROOT/Engine/Build/BatchFiles/RunUAT.sh BuildCookRun \
+            -project="$GITHUB_WORKSPACE/$PROJECT_FILE" \
+            -noP4 \
+            -platform=${{ matrix.platform }} \
+            -clientconfig=Shipping \
+            -cook -map=MainMenu \
+            -build -stage -pak -archive \
+            -archivedirectory="$GITHUB_WORKSPACE/PackagedBuilds/${{ matrix.platform }}"
+        shell: bash
+
+      - name: Upload packaged build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vilnature-${{ matrix.platform }}-${{ github.ref_name }}
+          path: PackagedBuilds/${{ matrix.platform }}/
+          retention-days: 30
+
+      - name: Attach build to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: PackagedBuilds/${{ matrix.platform }}/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
