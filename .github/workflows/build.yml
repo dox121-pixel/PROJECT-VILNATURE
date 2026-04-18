@@ -18,6 +18,8 @@ jobs:
   validate-assets:
     name: Asset Validation
     runs-on: self-hosted
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -36,6 +38,8 @@ jobs:
     name: UE5 Compile (${{ matrix.platform }})
     needs: validate-assets
     runs-on: self-hosted
+    permissions:
+      contents: read
     strategy:
       matrix:
         platform: [ Win64, Linux ]
@@ -69,6 +73,8 @@ jobs:
     needs: build
     if: github.event_name == 'release'
     runs-on: self-hosted
+    permissions:
+      contents: write   # needed to attach artifacts to releases
     strategy:
       matrix:
         platform: [ Win64, Linux ]
@@ -84,7 +90,7 @@ jobs:
             -noP4 \
             -platform=${{ matrix.platform }} \
             -clientconfig=Shipping \
-            -cook -map=MainLevel \
+            -cook -map=MainMenu \
             -build -stage -pak -archive \
             -archivedirectory="$GITHUB_WORKSPACE/PackagedBuilds/${{ matrix.platform }}"
         shell: bash

@@ -144,8 +144,16 @@ void UFlightComponent::ApplyCameraEffects(float DeltaTime) const
 
 void UFlightComponent::TryFireSonicBoom()
 {
+    const float SpeedFrac = GetSpeedFraction();
+
+    // Reset so the boom can retrigger once speed dips below the threshold again
+    if (bSonicBoomFired && SpeedFrac < SonicBoomFraction)
+    {
+        bSonicBoomFired = false;
+    }
+
     if (bSonicBoomFired) return;
-    if (GetSpeedFraction() < SonicBoomFraction) return;
+    if (SpeedFrac < SonicBoomFraction) return;
 
     bSonicBoomFired = true;
 
@@ -163,9 +171,8 @@ void UFlightComponent::TryFireSonicBoom()
     }
 
     OnSonicBoom.Broadcast(Owner->GetActorLocation());
-
-    // Allow the boom to retrigger after slowing below threshold
-    bSonicBoomFired = (GetSpeedFraction() >= SonicBoomFraction);
+    // bSonicBoomFired remains true; it is reset in TryFireSonicBoom when
+    // speed drops back below the threshold (see gate at top of function).
 }
 
 void UFlightComponent::SpawnTrailFX()

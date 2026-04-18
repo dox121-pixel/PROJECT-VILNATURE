@@ -264,7 +264,7 @@ void UCombatComponent::SpawnGroundSlamField()
         World,
         SlamLoc, SlamLoc,
         SlamRadius,
-        UEngineTypes::ConvertToTraceType(ECC_Destructible),
+        UEngineTypes::ConvertToTraceType(ECC_WorldDynamic),  // destructible actors use WorldDynamic
         false,
         TArray<AActor*>{Owner},
         EDrawDebugTrace::None,
@@ -298,8 +298,14 @@ EHitDirection UCombatComponent::CalculateHitDirection(const FVector& HitterLoc,
 
 void UCombatComponent::TriggerKillCam(AActor* Target)
 {
-    // Slow motion kill-cam: 0.2x dilation for 2 seconds
-    UGameplayStatics::SetGlobalTimeDilation(this, 0.2f);
+    // Slow-motion kill-cam: 0.2x time dilation for 2 perceived seconds.
+    // The timer uses wall-clock time, so we multiply by the dilation factor:
+    // wall_clock_seconds = perceived_seconds * time_dilation = 2.0f * 0.2f = 0.4f
+    static constexpr float KillCamTimeDilation     = 0.2f;
+    static constexpr float KillCamPerceivedSeconds = 2.0f;
+    static constexpr float KillCamWallClockSeconds = KillCamPerceivedSeconds * KillCamTimeDilation;
+
+    UGameplayStatics::SetGlobalTimeDilation(this, KillCamTimeDilation);
 
     if (UWorld* World = GetWorld())
     {
@@ -307,7 +313,6 @@ void UCombatComponent::TriggerKillCam(AActor* Target)
         World->GetTimerManager().SetTimer(KillCamHandle, [this]()
         {
             UGameplayStatics::SetGlobalTimeDilation(this, 1.0f);
-        }, 2.0f * 0.2f,   // wall-clock seconds (dilated world = 2s perceived)
-        false);
+        }, KillCamWallClockSeconds, false);
     }
 }

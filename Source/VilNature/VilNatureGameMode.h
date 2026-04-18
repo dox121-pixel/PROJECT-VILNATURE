@@ -45,6 +45,8 @@ public:
      * Broadcasts the current music intensity level (0.0 – 1.0) so MetaSounds
      * or FMOD can react.  Called automatically whenever the combo changes.
      */
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMusicIntensityChangedDelegate, float, Intensity);
+
     UPROPERTY(BlueprintAssignable, Category="Audio")
     FOnMusicIntensityChangedDelegate OnMusicIntensityChanged;
 

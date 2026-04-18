@@ -5,6 +5,7 @@
 #include "Materials/MaterialParameterCollectionInstance.h"
 #include "Materials/MaterialParameterCollection.h"
 #include "Kismet/GameplayStatics.h"
+#include "Camera/PlayerCameraManager.h"
 #include "Engine/World.h"
 
 AVFXManager::AVFXManager()
@@ -62,10 +63,13 @@ void AVFXManager::TriggerBloodSpatter(float Intensity)
 
     if (NS_BloodSpatter)
     {
-        // Screen-space spawn — attach to player camera if possible
+        // Spawn blood at the player camera location for correct screen-space appearance.
+        // Blueprints/child classes can override OnBloodSpatter to attach to the camera.
+        APlayerCameraManager* CamMgr = UGameplayStatics::GetPlayerCameraManager(this, 0);
+        const FVector SpawnLoc = CamMgr ? CamMgr->GetCameraLocation() : GetActorLocation();
         UNiagaraFunctionLibrary::SpawnSystemAtLocation(
             this, NS_BloodSpatter,
-            GetActorLocation(),   // Blueprints can override via event
+            SpawnLoc,
             FRotator::ZeroRotator
         );
     }

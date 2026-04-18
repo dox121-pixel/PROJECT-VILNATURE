@@ -206,6 +206,11 @@ def export_json(layout: EnvironmentLayout, out_path: Path) -> None:
 def export_csv(layout: EnvironmentLayout, out_path: Path) -> None:
     """Datasmith-compatible CSV for direct UE5 import."""
     import csv
+
+    if not layout.actors:
+        console.print("[yellow]No actors to export to CSV.[/yellow]")
+        return
+
     rows = []
     for a in layout.actors:
         t = a.transform

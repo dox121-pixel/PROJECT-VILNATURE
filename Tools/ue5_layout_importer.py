@@ -20,8 +20,8 @@ import os
 import unreal
 
 LAYOUT_FILE = os.path.join(
-    unreal.SystemLibrary.get_project_content_directory(),
-    "../Content/Maps/layout.json"
+    unreal.Paths.project_content_dir(),
+    "Maps", "layout.json"
 )
 
 
