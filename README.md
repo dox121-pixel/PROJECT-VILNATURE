@@ -1,6 +1,7 @@
 # PROJECT-VILNATURE
 
 > **Goal:** Build a complete, production-ready 3D game using **only** GitHub AI tooling — from the first line of code to the final shipped build.
+> **Graphics goal variant:** For AAA-quality photorealistic visuals, see the [Unreal Engine 5 — High-Quality Graphics](#unreal-engine-5--high-quality-graphics) sections below.
 
 ---
 
@@ -24,6 +25,18 @@
 16. [Performance, Profiling & Optimization with AI](#performance-profiling--optimization-with-ai)
 17. [Publishing & Deployment](#publishing--deployment)
 18. [Resources & References](#resources--references)
+19. **Unreal Engine 5 — High-Quality Graphics**
+    - 19.1 [Why UE5 for AAA Graphics](#191-why-ue5-for-aaa-graphics)
+    - 19.2 [UE5 Graphics Feature Setup](#192-ue5-graphics-feature-setup)
+    - 19.3 [UE5 Material System with Copilot](#193-ue5-material-system-with-copilot)
+    - 19.4 [Procedural Content Generation (PCG) with GitHub Models](#194-procedural-content-generation-pcg-with-github-models)
+    - 19.5 [UE5 Python Editor Scripting](#195-ue5-python-editor-scripting)
+    - 19.6 [Self-Hosted GitHub Actions Runner for UE5](#196-self-hosted-github-actions-runner-for-ue5)
+    - 19.7 [Git LFS Strategy for Large Binary Assets](#197-git-lfs-strategy-for-large-binary-assets)
+    - 19.8 [MetaHuman + Copilot](#198-metahuman--copilot)
+    - 19.9 [UE5 Cinematic Pipeline](#199-ue5-cinematic-pipeline)
+    - 19.10 [UE5 End-to-End Graphics Workflow](#1910-ue5-end-to-end-graphics-workflow)
+    - 19.11 [Godot 4 vs UE5 — Key Trade-offs](#1911-godot-4-vs-ue5--key-trade-offs)
 
 ---
 
@@ -768,19 +781,41 @@ public class GameManager : MonoBehaviour
 
 ### Unreal Engine 5 (C++ / Blueprints)
 
+```
+Copilot strengths with UE5:
+✓ C++ UObject/AActor boilerplate generated in seconds
+✓ HLSL custom nodes and material expressions written inline
+✓ Build.cs module files, .uproject targets — no hand-editing
+✓ UnrealAutomationTool CLI commands explained by Copilot Chat
+✓ See Section 19 for the full UE5 AAA-graphics workflow
+```
+
 ```cpp
-// Copilot prompt: "UE5 C++ character with enhanced input and camera spring arm"
+// Copilot prompt: "UE5 C++ ACharacter subclass with Enhanced Input, Lumen-compatible camera,
+//                  and modular ability component using Gameplay Ability System (GAS)"
 UCLASS()
 class VILNATURE_API AVilNatureCharacter : public ACharacter
 {
     GENERATED_BODY()
 
-    UPROPERTY(VisibleAnywhere) USpringArmComponent* CameraBoom;
-    UPROPERTY(VisibleAnywhere) UCameraComponent*    FollowCamera;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess))
+    USpringArmComponent* CameraBoom;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess))
+    UCameraComponent* FollowCamera;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Abilities", meta = (AllowPrivateAccess))
+    UAbilitySystemComponent* AbilitySystem;
 
 public:
     AVilNatureCharacter();
     virtual void SetupPlayerInputComponent(UInputComponent* Input) override;
+
+protected:
+    UPROPERTY(EditAnywhere, Category = "Input") UInputMappingContext* DefaultMappingContext;
+    UPROPERTY(EditAnywhere, Category = "Input") UInputAction* MoveAction;
+    UPROPERTY(EditAnywhere, Category = "Input") UInputAction* LookAction;
+    UPROPERTY(EditAnywhere, Category = "Input") UInputAction* JumpAction;
 
 private:
     void Move(const FInputActionValue& Value);
@@ -1157,6 +1192,14 @@ jobs:
 | gdtoolkit Linter | https://github.com/Scony/godot-gdscript-toolkit |
 | Godot CI Docker Image | https://github.com/abarichello/godot-ci |
 | OpenAI Python SDK | https://github.com/openai/openai-python |
+| Unreal Engine 5 Docs | https://dev.epicgames.com/documentation/en-us/unreal-engine |
+| UE5 Lumen Documentation | https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-global-illumination-and-reflections |
+| UE5 Nanite Documentation | https://dev.epicgames.com/documentation/en-us/unreal-engine/nanite-virtualized-geometry |
+| UE5 PCG Documentation | https://dev.epicgames.com/documentation/en-us/unreal-engine/procedural-content-generation |
+| MetaHuman Creator | https://metahuman.unrealengine.com/ |
+| UE5 Python Scripting | https://dev.epicgames.com/documentation/en-us/unreal-engine/scripting-the-unreal-editor-using-python |
+| UnrealAutomationTool | https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-automation-tool |
+| Git LFS | https://git-lfs.com/ |
 
 ---
 
@@ -1186,3 +1229,602 @@ godot project.godot
 ---
 
 *This README was authored with GitHub Copilot Chat and serves as a living reference for the PROJECT-VILNATURE game development journey.*
+
+---
+
+## Unreal Engine 5 — High-Quality Graphics
+
+> Use this section when the primary project goal is **AAA-quality photorealistic visuals**. All GitHub AI tools remain the same; the focus shifts to C++, HLSL, and UE5's rendering pipeline.
+
+---
+
+### 19.1 Why UE5 for AAA Graphics
+
+| UE5 Feature | What it gives you |
+|---|---|
+| **Lumen** | Fully dynamic global illumination — no baking, no lightmaps |
+| **Nanite** | Virtualized geometry — billions of triangles, no manual LODs |
+| **Temporal Super Resolution (TSR)** | Native upscaling to 4K at a fraction of the GPU cost |
+| **Substrate** | New layered material system for physically accurate surfaces |
+| **Path Tracing** | Reference-quality offline renders and in-game ray tracing |
+| **MetaHuman** | Photorealistic human characters out of the box |
+| **World Partition** | Infinitely large open worlds without manual streaming zones |
+| **Procedural Content Generation (PCG)** | Rule-based foliage, rocks, buildings — AI-assisted layout |
+
+---
+
+### 19.2 UE5 Graphics Feature Setup
+
+Enable UE5's core rendering features via `DefaultEngine.ini` — Copilot can generate the full ini block from a comment:
+
+```ini
+; Copilot prompt: "DefaultEngine.ini settings to enable Lumen GI, Hardware Ray Tracing,
+;                  Nanite, Temporal Super Resolution, and film grain post-process in UE5"
+[/Script/Engine.RendererSettings]
+r.Lumen.Reflections.Allow=1
+r.Lumen.DiffuseIndirect.Allow=1
+r.RayTracing=1
+r.RayTracing.Shadows=1
+r.Nanite.ProjectEnabled=1
+r.TemporalAA.Method=4          ; 4 = TSR
+r.FilmGrain=1
+r.FilmGrain.Intensity=0.4
+r.PostProcessAAQuality=6
+r.Lumen.TraceMeshSDFs=1
+r.Lumen.HardwareRayTracing=1
+
+[/Script/Engine.Engine]
+bEnableRayTracing=True
+```
+
+**Copilot Chat usage for rendering settings:**
+
+```
+Explain the difference between Lumen Software Tracing and Hardware Ray Tracing.
+When should I use each for a dense forest open-world game?
+```
+
+```
+My Lumen scene shows light leaking through thin walls.
+What DefaultEngine.ini or r.Lumen.* cvars should I tweak to fix this?
+```
+
+```
+I'm targeting 60fps on RTX 3070 at 1440p. Recommend TSR quality settings
+and Lumen tracing budgets that balance quality vs. performance.
+```
+
+---
+
+### 19.3 UE5 Material System with Copilot
+
+#### Substrate Master Material (HLSL Custom Node)
+
+```hlsl
+// Copilot prompt: "HLSL custom node for Substrate layered material:
+//                  moss blend based on world-space normal and height"
+// Node type: Custom (HLSL), Inputs: BaseColor, MossColor, WorldNormal, WorldHeight, MossAmount
+
+float upFacing   = saturate(dot(WorldNormal, float3(0, 0, 1)));
+float heightMask = saturate((WorldHeight - 50.0f) / 200.0f);
+float mossMask   = upFacing * heightMask * MossAmount;
+return lerp(BaseColor, MossColor, mossMask);
+```
+
+#### Landscape Auto-Material (8 Biome Layers)
+
+```
+// Copilot Chat prompt:
+"Generate a UE5 Material Function for a landscape auto-material with 8 biome layers:
+ snow (high altitude), rock, alpine grass, forest floor, wet mud, sand, shallow water, deep water.
+ Use world-space height and slope angle for automatic layer blending.
+ Output: BaseColor, Normal, Roughness, Metallic for Substrate."
+```
+
+#### Post-Process Color Grading
+
+```cpp
+// Copilot prompt: "UE5 C++ function to apply stylized color grading post-process
+//                  material at runtime using a FPostProcessSettings struct"
+void AVilNaturePlayerController::ApplyColorGrading(float Saturation, float Contrast, UMaterialInterface* LUT)
+{
+    FPostProcessSettings PP;
+    PP.bOverride_ColorSaturation     = true;
+    PP.ColorSaturation               = FVector4(Saturation, Saturation, Saturation, 1.0f);
+    PP.bOverride_ColorContrast       = true;
+    PP.ColorContrast                 = FVector4(Contrast, Contrast, Contrast, 1.0f);
+    PP.bOverride_ColorGradingLUT     = true;
+    PP.ColorGradingLUT               = Cast<UTexture>(LUT);
+    GetPlayerCameraManager()->SetManualCameraFade(0.0f, FLinearColor::Black, false);
+    // Apply via post-process volume or camera override
+}
+```
+
+---
+
+### 19.4 Procedural Content Generation (PCG) with GitHub Models
+
+#### PCG Graph for Procedural Forest
+
+```cpp
+// Copilot prompt: "UE5 PCG graph C++ component: scatter foliage with
+//                  density driven by slope, altitude, and biome mask texture"
+UCLASS()
+class VILNATURE_API UVilNaturePCGForest : public UPCGBlueprintElement
+{
+    GENERATED_BODY()
+
+public:
+    UPROPERTY(EditAnywhere, Category = "Forest") float MaxSlope      = 35.0f;
+    UPROPERTY(EditAnywhere, Category = "Forest") float MinAltitude   = 50.0f;
+    UPROPERTY(EditAnywhere, Category = "Forest") float MaxAltitude   = 800.0f;
+    UPROPERTY(EditAnywhere, Category = "Forest") float TreeDensity   = 0.6f;
+
+    virtual void ExecuteWithContext_Implementation(
+        UPARAM(ref) FPCGContext&        Context,
+        const FPCGDataCollection&       InputData,
+        FPCGDataCollection&             OutputData) override;
+};
+```
+
+#### LLM-Generated Biome Placement Rules
+
+```python
+# Copilot prompt: "Use GitHub Models GPT-4o to generate PCG biome placement rules
+#                  from a natural language world description"
+def generate_biome_rules(world_description: str) -> dict:
+    prompt = f"""World description: {world_description}
+
+Generate PCG biome placement rules as JSON:
+{{
+  "biomes": [
+    {{
+      "name": "...",
+      "altitude_min": N,
+      "altitude_max": N,
+      "slope_max": N,
+      "moisture": "dry|moderate|wet",
+      "foliage": ["tree_type_1", "..."],
+      "ground_cover": "..."
+    }}
+  ]
+}}"""
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": prompt}],
+        response_format={"type": "json_object"},
+    )
+    return json.loads(response.choices[0].message.content)
+
+# Example usage
+rules = generate_biome_rules(
+    "A temperate mountain range with dense pine forests below the snowline, "
+    "alpine meadows mid-elevation, and bare granite peaks above 1200m."
+)
+```
+
+---
+
+### 19.5 UE5 Python Editor Scripting
+
+Use Copilot to write Editor Python scripts that automate tedious UE5 asset operations.
+
+#### Enable Nanite on All Static Meshes
+
+```python
+# Copilot prompt: "Unreal Editor Python script to enable Nanite on all StaticMesh
+#                  assets in the /Game/Environment folder and save them"
+import unreal
+
+asset_reg  = unreal.AssetRegistryHelpers.get_asset_registry()
+mesh_class = unreal.StaticMesh.static_class()
+assets     = asset_reg.get_assets_by_path("/Game/Environment", recursive=True)
+
+with unreal.ScopedEditorTransaction("Enable Nanite on Environment Meshes") as t:
+    for asset_data in assets:
+        if asset_data.asset_class_path.asset_name != "StaticMesh":
+            continue
+        mesh = asset_data.get_asset()
+        if not mesh:
+            continue
+        nanite_settings = mesh.get_editor_property("nanite_settings")
+        nanite_settings.set_editor_property("enabled", True)
+        mesh.set_editor_property("nanite_settings", nanite_settings)
+        unreal.EditorAssetLibrary.save_asset(mesh.get_path_name())
+
+print(f"Nanite enabled on {len(assets)} assets")
+```
+
+#### Batch LOD Automation
+
+```python
+# Copilot prompt: "UE5 Python script to set automatic LOD reduction on all meshes
+#                  in /Game/Characters with 4 LOD levels and 50% reduction per level"
+import unreal
+
+lod_settings = unreal.EditorStaticMeshLibrary
+
+for asset_data in asset_reg.get_assets_by_path("/Game/Characters", recursive=True):
+    if asset_data.asset_class_path.asset_name != "StaticMesh":
+        continue
+    mesh = asset_data.get_asset()
+    reduction = unreal.StaticMeshReductionSettings()
+    reduction.set_editor_property("percent_triangles", 0.5)
+    for lod_idx in range(1, 4):
+        lod_settings.set_lods_with_notification(mesh, [reduction] * lod_idx, True)
+    unreal.EditorAssetLibrary.save_asset(mesh.get_path_name())
+```
+
+---
+
+### 19.6 Self-Hosted GitHub Actions Runner for UE5
+
+UE5 CI/CD requires a dedicated machine with GPU — standard GitHub-hosted runners cannot install the engine.
+
+#### Runner Setup Guide
+
+```bash
+# On your build machine (Windows or Linux with NVIDIA GPU):
+
+# 1. Download and configure the Actions runner
+mkdir actions-runner && cd actions-runner
+curl -o actions-runner-linux-x64.tar.gz -L \
+  https://github.com/actions/runner/releases/download/v2.317.0/actions-runner-linux-x64-2.317.0.tar.gz
+tar xzf ./actions-runner-linux-x64.tar.gz
+./config.sh --url https://github.com/dox121-pixel/PROJECT-VILNATURE \
+            --token YOUR_RUNNER_TOKEN --labels ue5-gpu --name ue5-build-01
+
+# 2. Install as a service
+sudo ./svc.sh install
+sudo ./svc.sh start
+```
+
+#### UE5 Build Workflow
+
+```yaml
+# .github/workflows/ue5-build.yml
+name: UE5 Build & Package
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: [self-hosted, ue5-gpu]   # targets your dedicated build machine
+    env:
+      UE_ROOT: "C:/Program Files/Epic Games/UE_5.4"   # adjust to your install
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Warm Derived Data Cache (DDC)
+        run: |
+          & "$env:UE_ROOT/Engine/Binaries/Win64/UnrealEditor-Cmd.exe" `
+            "${{ github.workspace }}/VilNature.uproject" `
+            -run=DerivedDataCache -fill -DDC=DerivedDataBackendGraph
+
+      - name: Compile C++ (Development Editor)
+        run: |
+          & "$env:UE_ROOT/Engine/Build/BatchFiles/Build.bat" `
+            VilNatureEditor Win64 Development `
+            "${{ github.workspace }}/VilNature.uproject" -waitmutex
+
+      - name: Run Automation Tests
+        run: |
+          & "$env:UE_ROOT/Engine/Binaries/Win64/UnrealEditor-Cmd.exe" `
+            "${{ github.workspace }}/VilNature.uproject" `
+            -ExecCmds="Automation RunTests VilNature;Quit" `
+            -log -unattended -nullrhi
+
+      - name: Package for Windows
+        run: |
+          & "$env:UE_ROOT/Engine/Build/BatchFiles/RunUAT.bat" BuildCookRun `
+            -project="${{ github.workspace }}/VilNature.uproject" `
+            -noP4 -platform=Win64 -clientconfig=Shipping `
+            -cook -build -stage -pak -archive `
+            -archivedirectory="${{ github.workspace }}/Packaged"
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: VilNature-Win64-Shipping
+          path: Packaged/
+```
+
+---
+
+### 19.7 Git LFS Strategy for Large Binary Assets
+
+UE5 projects contain gigabytes of `.uasset`, `.umap`, textures, and audio files. Configure Git LFS from day one.
+
+```bash
+# Initialize Git LFS in your UE5 project
+git lfs install
+
+# Track all UE5 binary asset types
+git lfs track "*.uasset"
+git lfs track "*.umap"
+git lfs track "*.fbx"
+git lfs track "*.png" "*.tga" "*.exr" "*.hdr"
+git lfs track "*.wav" "*.ogg" "*.mp3"
+git lfs track "*.mp4" "*.mov"
+git lfs track "*.psd" "*.xcf"
+
+# Commit the .gitattributes file
+git add .gitattributes
+git commit -m "chore: configure Git LFS tracking for UE5 binary assets"
+```
+
+Generated `.gitattributes` (Copilot can produce this from a comment):
+
+```gitattributes
+# Copilot prompt: "Git LFS .gitattributes for a UE5 project — all binary asset types"
+*.uasset  filter=lfs diff=lfs merge=lfs -text
+*.umap    filter=lfs diff=lfs merge=lfs -text
+*.fbx     filter=lfs diff=lfs merge=lfs -text
+*.png     filter=lfs diff=lfs merge=lfs -text
+*.tga     filter=lfs diff=lfs merge=lfs -text
+*.exr     filter=lfs diff=lfs merge=lfs -text
+*.hdr     filter=lfs diff=lfs merge=lfs -text
+*.wav     filter=lfs diff=lfs merge=lfs -text
+*.ogg     filter=lfs diff=lfs merge=lfs -text
+*.mp4     filter=lfs diff=lfs merge=lfs -text
+*.psd     filter=lfs diff=lfs merge=lfs -text
+```
+
+**Copilot CLI for LFS management:**
+
+```bash
+gh copilot suggest "list all Git LFS objects larger than 100 MB in this repo"
+gh copilot suggest "prune old Git LFS objects that are no longer referenced by any branch"
+gh copilot explain "git lfs migrate import --include='*.png' --everything"
+```
+
+---
+
+### 19.8 MetaHuman + Copilot
+
+#### Control Rig — Procedural IK Adjustments
+
+```python
+# Copilot prompt: "UE5 Control Rig Python script for foot IK:
+#                  trace ground below each foot and adjust foot bone rotation to match slope"
+import unreal
+
+@unreal.uclass()
+class VilNatureFootIK(unreal.RigUnit_FullbodyIK):
+
+    foot_bones = ["foot_l", "foot_r"]
+    trace_dist  = 100.0   # cm below foot
+
+    def solve(self) -> None:
+        for bone_name in self.foot_bones:
+            bone_loc  = self.hierarchy.get_global_transform(
+                unreal.RigElementKey(type=unreal.RigElementType.BONE, name=bone_name)
+            ).translation
+            start     = bone_loc + unreal.Vector(0, 0, 50)
+            end       = bone_loc - unreal.Vector(0, 0, self.trace_dist)
+            hit_loc, hit_normal, hit = self._line_trace(start, end)
+            if hit:
+                self._align_foot_to_normal(bone_name, hit_normal)
+```
+
+#### NPC Facial Animation from GitHub Models
+
+```python
+# Copilot prompt: "Generate UE5 MetaHuman facial animation curve values
+#                  from an emotion + dialogue line using GitHub Models"
+def get_facial_animation(emotion: str, dialogue: str) -> dict:
+    prompt = f"""NPC emotion: {emotion}
+Dialogue line: "{dialogue}"
+
+Generate MetaHuman facial animation curve intensities (0.0–1.0) as JSON:
+{{
+  "BrowsIn_L": N, "BrowsIn_R": N,
+  "BrowsOuterLower_L": N, "BrowsOuterLower_R": N,
+  "EyesSquint_L": N, "EyesSquint_R": N,
+  "MouthSmile_L": N, "MouthSmile_R": N,
+  "JawOpen": N,
+  "CheekPuff_L": N, "CheekPuff_R": N
+}}"""
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": prompt}],
+        response_format={"type": "json_object"},
+    )
+    return json.loads(response.choices[0].message.content)
+```
+
+#### Copilot Chat Prompts for MetaHuman
+
+```
+How do I blend a MetaHuman facial pose into a Sequencer animation track
+without overwriting the base pose in UE5.4?
+```
+
+```
+My MetaHuman NPC has mouth penetration artifacts during lip sync.
+What Control Rig or post-process constraints can I add to fix this?
+```
+
+---
+
+### 19.9 UE5 Cinematic Pipeline
+
+#### Sequencer Python Automation
+
+```python
+# Copilot prompt: "Unreal Editor Python script to create a cinematic camera
+#                  flythrough in Sequencer along a predefined spline path"
+import unreal
+
+def create_cinematic_flythrough(level_sequence_path: str, spline_actor_name: str) -> None:
+    seq     = unreal.load_asset(level_sequence_path)
+    editor  = unreal.LevelSequenceEditorBlueprintLibrary
+    spline  = unreal.EditorLevelLibrary.get_actor_reference(spline_actor_name)
+    cine_cam = unreal.EditorLevelLibrary.spawn_actor_from_class(
+        unreal.CineCameraActor, unreal.Vector(0, 0, 0)
+    )
+
+    # Add the camera to the sequence
+    binding = seq.add_possessable(cine_cam)
+    track   = binding.add_track(unreal.MovieScene3DTransformTrack)
+    section = track.add_section()
+    section.set_range(unreal.SequencerScriptingRange(has_start=True, inclusive_start=0,
+                                                     has_end=True, exclusive_end=300))
+
+    # Key position along spline at each frame
+    points = spline.get_editor_property("spline_component").get_number_of_spline_points()
+    for i in range(points):
+        t   = i / (points - 1)
+        loc = spline.get_editor_property("spline_component").get_location_at_time(
+            t * spline.get_editor_property("spline_component").duration,
+            unreal.SplineCoordinateSpace.WORLD
+        )
+        section.add_key(unreal.FrameNumber(i * 10), unreal.MovieSceneDoubleChannel(), loc.x)
+
+    unreal.EditorAssetLibrary.save_asset(level_sequence_path)
+    print(f"Cinematic flythrough created: {points} keyframes")
+```
+
+#### High-Res Path-Traced Screenshots
+
+```python
+# Copilot prompt: "UE5 Python automation script to render a sequence of
+#                  path-traced screenshots at 4K using Movie Render Queue"
+import unreal
+
+def render_path_traced_screenshots(sequence_path: str, output_dir: str) -> None:
+    queue    = unreal.MoviePipelineQueueEngineSubsystem()
+    job      = queue.allocate_new_job(unreal.MoviePipelineExecutorJob)
+    job.sequence = unreal.SoftObjectPath(sequence_path)
+    job.map      = unreal.EditorLevelLibrary.get_editor_world()
+
+    config   = job.get_configuration()
+    settings = config.find_or_add_setting_by_class(unreal.MoviePipelineDeferredPassBase)
+
+    # Enable Path Tracing
+    pt = config.find_or_add_setting_by_class(unreal.MoviePipelinePathTracerPass)
+    pt.set_editor_property("spatial_sample_count", 64)
+
+    # 4K output
+    output   = config.find_or_add_setting_by_class(unreal.MoviePipelineOutputSetting)
+    output.set_editor_property("output_resolution", unreal.IntPoint(3840, 2160))
+    output.set_editor_property("output_directory", unreal.DirectoryPath(output_dir))
+    output.set_editor_property("file_name_format", "{sequence_name}_{frame_number}")
+
+    # EXR output for compositing
+    exr = config.find_or_add_setting_by_class(unreal.MoviePipelineImageSequenceOutput_EXR)
+    exr.set_editor_property("compression", unreal.EXRCompressionFormat.PIZ)
+
+    executor = unreal.MoviePipelinePIEExecutor()
+    queue.render_queue_with_executor_instance(executor)
+```
+
+#### Automated Trailer Rendering on Tag Push
+
+```yaml
+# .github/workflows/ue5-trailer.yml
+name: Render Cinematic Trailer
+
+on:
+  push:
+    tags: ['v*']   # triggers on version tags like v1.0.0
+
+jobs:
+  render:
+    runs-on: [self-hosted, ue5-gpu]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Render trailer frames (path tracing)
+        run: |
+          & "$env:UE_ROOT/Engine/Binaries/Win64/UnrealEditor-Cmd.exe" `
+            "${{ github.workspace }}/VilNature.uproject" `
+            -MovieSceneCapture -LevelSequence="/Game/Cinematics/Trailer_Main" `
+            -MovieFolder="${{ github.workspace }}/TrailerFrames" `
+            -MovieFormat=PNG -MovieQuality=100 `
+            -notexturestreaming -unattended
+
+      - name: Upload trailer frames
+        uses: actions/upload-artifact@v4
+        with:
+          name: trailer-frames-${{ github.ref_name }}
+          path: TrailerFrames/
+          retention-days: 30
+```
+
+---
+
+### 19.10 UE5 End-to-End Graphics Workflow
+
+```
+Phase 1: Project Setup
+  └── Copilot CLI: scaffold UE5 C++ project (Game, Blank template)
+  └── Copilot: Generate .gitignore for UE5 (excludes Binaries, DerivedDataCache, Saved)
+  └── GitHub LFS: track *.uasset, *.umap, *.fbx, *.png, *.wav (see Section 19.7)
+  └── Copilot: Generate VilNature.Build.cs with required modules
+
+Phase 2: Core Rendering Settings
+  └── Copilot: Generate DefaultEngine.ini with Lumen + Nanite + TSR settings
+  └── Copilot Chat: Explain Lumen software vs hardware tracing trade-offs
+  └── Copilot Python: Enable Nanite on all existing static meshes in bulk
+
+Phase 3: Materials & Shaders
+  └── Copilot: Substrate master material (rock, bark, wet mud, metal, moss)
+  └── Copilot: Landscape auto-material with 8 biome layers
+  └── Copilot Chat: Debug Lumen artifacts and light leaking in cave interiors
+  └── Copilot: Custom post-process material for color grading
+
+Phase 4: World Building (PCG + GitHub Models)
+  └── Copilot: UE5 PCG graph component for procedural forest density
+  └── GitHub Models (GPT-4o): Generate biome placement rules from world description
+  └── Copilot: World Partition streaming volume placement automation
+  └── Copilot: Foliage interaction system (grass bending, snow accumulation)
+
+Phase 5: Lighting
+  └── Copilot: Time-of-day system driving sky atmosphere + exponential height fog
+  └── Copilot: Lumen sky light recapture on weather transitions
+  └── Copilot Chat: "Optimize Lumen screen-space tracing budget for open world at 60fps"
+
+Phase 6: Characters & Animation
+  └── MetaHuman Creator: create photorealistic characters
+  └── Copilot: Control Rig Python for procedural foot IK on uneven terrain
+  └── Copilot: Motion Matching setup for fluid locomotion blending
+  └── GitHub Models (GPT-4o): Generate facial animation curve data for NPC dialogue
+
+Phase 7: Performance
+  └── Copilot: stat GPU / stat RHI profiling scripts to capture per-pass timings
+  └── Copilot Chat: "My Nanite scene has 60ms GPU frame time — where to start?"
+  └── GitHub Actions (self-hosted): Nightly builds with shader compilation timing reports
+
+Phase 8: Cinematic & Trailer
+  └── Copilot Python: Sequencer camera flythrough along spline path
+  └── Copilot Python: Movie Render Queue with path tracing at 4K EXR
+  └── GitHub Actions: Automated trailer frame rendering on release tag push
+```
+
+---
+
+### 19.11 Godot 4 vs UE5 — Key Trade-offs
+
+| Aspect | Godot 4 | Unreal Engine 5 |
+|---|---|---|
+| **Graphics ceiling** | Good / stylized | AAA photorealistic |
+| **Copilot language** | GDScript (well-supported) | C++ + Blueprints (C++ well-supported) |
+| **Codespaces viability** | ✅ Full workflow | ⚠️ Code-only, no visual preview |
+| **CI/CD complexity** | Low (Docker image available) | High (self-hosted GPU runner required) |
+| **Asset pipeline** | Simple (import from Blender) | Complex (Datasmith, MetaHuman, Quixel) |
+| **GitHub Models integration** | Direct HTTP in GDScript | REST call from C++ or Blueprint HTTP node |
+| **Git LFS requirement** | Optional | Essential (100+ GB of binary assets) |
+| **Learning curve with AI** | Low | Medium–High (engine complexity) |
+| **Build time** | Seconds (GDScript, no compile) | Minutes–hours (C++ + shader compile) |
+| **Royalties** | None (MIT) | 5% above $1M gross revenue |
+
+**Bottom line:** Switching to UE5 does not change *which* GitHub AI tools you use — Copilot, Copilot Chat, GitHub Models, and GitHub Actions all remain central. What changes is the *focus*: more C++ and HLSL generation, more CI/CD infrastructure work, and GitHub Models playing a bigger role in procedural content layout rather than real-time NPC dialogue (due to UE5's rendering complexity consuming more development time).
