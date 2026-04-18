@@ -1,6 +1,6 @@
 {
     "FileVersion": 3,
-    "EngineAssociation": "5.3",
+    "EngineAssociation": "5.7",
     "Category": "Game",
     "Description": "PROJECT-VILNATURE — Invincible superhero action game built entirely with AI tooling.",
     "Modules": [
@@ -15,7 +15,6 @@
                 "Chaos",
                 "ChaosVehicles",
                 "GeometryCollectionEngine",
-                "FieldSystemEngine",
                 "Niagara",
                 "EnhancedInput",
                 "AIModule",
@@ -35,8 +34,6 @@
         { "Name": "MetaHuman",            "Enabled": true },
         { "Name": "PythonScriptPlugin",   "Enabled": true },
         { "Name": "EditorScriptingUtilities", "Enabled": true },
-        { "Name": "LumenPlugin",          "Enabled": true },
-        { "Name": "VirtualShadowMaps",    "Enabled": true },
         { "Name": "HairStrands",          "Enabled": true }
     ]
 }

@@ -18,7 +18,6 @@ public class VilNature : ModuleRules
             "PhysicsCore",
             "Chaos",
             "GeometryCollectionEngine",
-            "FieldSystemEngine",
             "Niagara",
             "AIModule",
             "NavigationSystem",

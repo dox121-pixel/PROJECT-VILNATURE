@@ -88,7 +88,7 @@ Python is used by the helper tools in the `Tools/` folder.
    ```
    Should show `Python 3.11.x` ✅
 
-### Step 2D — Install Unreal Engine 5.3
+### Step 2D — Install Unreal Engine 5.7
 **[UE5 = Unreal Engine 5]** — This is the actual game engine. It's the program that runs the game.
 
 1. Go to https://www.unrealengine.com/en-US/download
@@ -96,7 +96,7 @@ Python is used by the helper tools in the `Tools/` folder.
 3. Download and install the **Epic Games Launcher**
 4. Inside the launcher, go to **Unreal Engine → Library**
 5. Click the **"+"** button to add a new engine version
-6. Select **5.3** from the dropdown and click **Install**
+6. Select **5.7** from the dropdown and click **Install**
    - ⚠️ This download is ~30 GB. Leave it overnight if needed.
 7. After installation, the version should appear in your Library ✅
 
@@ -132,7 +132,7 @@ Python is used by the helper tools in the `Tools/` folder.
 
 1. Open the **Epic Games Launcher**
 2. Click **Unreal Engine → Library**
-3. Next to **5.3**, click **Launch**
+3. Next to **5.7**, click **Launch**
 4. UE5 will open with a project browser. Click **Browse** (or "Open")
 5. Navigate to your `PROJECT-VILNATURE` folder
 6. Double-click **`VilNature.uproject`**
@@ -485,7 +485,7 @@ On **Linux/Mac:**
 
 On **Windows:**
 ```
-"C:\Program Files\Epic Games\UE_5.3\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" ^
+"C:\Program Files\Epic Games\UE_5.7\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" ^
     VilNature.uproject ^
     -run=pythonscript ^
     -script=Tools/ue5_layout_importer.py
@@ -640,7 +640,7 @@ For UE5 C++ changes to take effect, you still need to:
 ## 11. Troubleshooting Common Problems
 
 ### "The project failed to compile when I opened it"
-- Make sure you installed UE5 **version 5.3 exactly** (not 5.4 or 5.5)
+- Make sure you installed UE5 **version 5.7 exactly** (not an older version like 5.5 or 5.6)
 - In UE5, go to **Tools → Refresh Visual Studio Project** and try again
 - Check the **Output Log** (Window → Output Log) for the exact error message
 
