@@ -1,0 +1,43 @@
+name: Asset Validation Pipeline
+
+on:
+  push:
+    paths:
+      - 'Content/**'
+      - 'Tools/**'
+  pull_request:
+    paths:
+      - 'Content/**'
+      - 'Tools/**'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate Game Assets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r Tools/requirements.txt
+
+      - name: Check texture sizes & formats
+        run: python Tools/texture_validator.py --report-only
+
+      - name: Validate asset naming conventions
+        run: python Tools/asset_import_pipeline.py --dry-run --validate-only
+
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-validation-report
+          path: validation_report.json
+          retention-days: 7

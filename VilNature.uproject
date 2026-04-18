@@ -1,0 +1,42 @@
+{
+    "FileVersion": 3,
+    "EngineAssociation": "5.3",
+    "Category": "Game",
+    "Description": "PROJECT-VILNATURE — Invincible superhero action game built entirely with AI tooling.",
+    "Modules": [
+        {
+            "Name": "VilNature",
+            "Type": "Runtime",
+            "LoadingPhase": "Default",
+            "AdditionalDependencies": [
+                "Engine",
+                "CoreUObject",
+                "PhysicsCore",
+                "Chaos",
+                "ChaosVehicles",
+                "GeometryCollectionEngine",
+                "FieldSystemEngine",
+                "Niagara",
+                "EnhancedInput",
+                "AIModule",
+                "HTTP",
+                "Json",
+                "JsonUtilities"
+            ]
+        }
+    ],
+    "Plugins": [
+        { "Name": "Niagara",              "Enabled": true },
+        { "Name": "ChaosVehiclesPlugin",  "Enabled": true },
+        { "Name": "GeometryProcessing",   "Enabled": true },
+        { "Name": "ModelingToolsEditorMode", "Enabled": true },
+        { "Name": "PCG",                  "Enabled": true },
+        { "Name": "EnhancedInput",        "Enabled": true },
+        { "Name": "MetaHuman",            "Enabled": true },
+        { "Name": "PythonScriptPlugin",   "Enabled": true },
+        { "Name": "EditorScriptingUtilities", "Enabled": true },
+        { "Name": "LumenPlugin",          "Enabled": true },
+        { "Name": "VirtualShadowMaps",    "Enabled": true },
+        { "Name": "HairStrands",          "Enabled": true }
+    ]
+}

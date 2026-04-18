@@ -1,0 +1,62 @@
+# Unreal Engine generated folders
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vs/
+.idea/
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+
+# Unreal Engine generated files
+*.generated.h
+*.gen.cpp
+
+# OS metadata
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+.tox/
+.venv/
+venv/
+env/
+.env
+
+# Node / npm (if any tooling uses it)
+node_modules/
+npm-debug.log*
+
+# Logs
+*.log
+logs/
+
+# Temp / scratch files
+*.tmp
+*.swp
+*.bak
+*~
+
+# UE5 crash reports
+CrashReportClient/
+
+# Compiled shader cache
+ShaderCache/
+
+# Local config overrides (machine-specific)
+Config/UserEditorPerProjectIni/
