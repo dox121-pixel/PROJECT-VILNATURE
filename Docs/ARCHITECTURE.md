@@ -98,7 +98,7 @@ python Tools/generate_environment.py --blocks 3 --seed 1337
 # 4. Validate textures (no textures yet = zero errors)
 python Tools/texture_validator.py --path Content/
 
-# 5. Open VilNature.uproject in UE5 5.3+
+# 5. Open VilNature.uproject in UE5 5.7+
 ```
 
 ## Environment Variables
