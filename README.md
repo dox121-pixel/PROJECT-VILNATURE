@@ -118,7 +118,7 @@ void fragment() {
     vec2 uv     = UV + vec2(TIME * wave_speed * 0.02, TIME * wave_speed * 0.015);
     vec3 normal = texture(normal_map, uv).rgb * 2.0 - 1.0;
     float depth = texture(DEPTH_TEXTURE, SCREEN_UV).r;
-    float foam  = step(foam_cutoff, depth);
+    float foam  = 1.0 - step(foam_cutoff, depth); // foam at shallow/near-surface edges
     ALBEDO      = mix(water_color.rgb, vec3(1.0), foam);
     ALPHA       = water_color.a;
     NORMAL      = normalize(normal);
@@ -193,7 +193,7 @@ const MAX_SLOTS := 24
 func add_item(item: ItemData, amount: int = 1) -> bool:
     for slot in slots:
         if slot.item == item and slot.count < item.max_stack:
-            slot.count = mini(slot.count + amount, item.max_stack)
+            slot.count = min(slot.count + amount, item.max_stack)
             return true
     if slots.size() < MAX_SLOTS:
         slots.append(ItemStack.new(item, amount))
@@ -207,7 +207,7 @@ func add_item(item: ItemData, amount: int = 1) -> bool:
 # Copilot prompt: "JSON save/load system for player progress in Godot 4"
 func save_game(slot: int = 0) -> void:
     var data := {
-        "player_pos":   var_to_str(player.global_position),
+        "player_pos":   {"x": player.global_position.x, "y": player.global_position.y, "z": player.global_position.z},
         "health":       player.health,
         "inventory":    player.inventory.serialize(),
         "timestamp":    Time.get_unix_time_from_system(),
@@ -528,8 +528,8 @@ jobs:
       - name: Run gdtoolkit
         run: |
           pip install gdtoolkit==4.*
-          gdlint **/*.gd
-          gdformat --check **/*.gd
+          find . -name "*.gd" -print0 | xargs -0 gdlint
+          find . -name "*.gd" -print0 | xargs -0 gdformat --check
 ```
 
 ### 6.3 Automated Scene & Unit Tests
@@ -648,8 +648,10 @@ Develop the entire game in the browser or VS Code without any local setup.
 #!/usr/bin/env bash
 # .devcontainer/setup.sh — installs Godot 4 + tools in the Codespace
 GODOT_VERSION="4.3"
-wget -q "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip" -O /tmp/godot.zip
-unzip -q /tmp/godot.zip -d /tmp
+GODOT_ZIP="/tmp/godot.zip"
+wget -q "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip" -O "$GODOT_ZIP"
+if [ ! -s "$GODOT_ZIP" ]; then echo "❌ Download failed"; exit 1; fi
+unzip -q "$GODOT_ZIP" -d /tmp
 mv /tmp/Godot_v${GODOT_VERSION}-stable_linux.x86_64 /usr/local/bin/godot
 chmod +x /usr/local/bin/godot
 pip install gdtoolkit==4.*
