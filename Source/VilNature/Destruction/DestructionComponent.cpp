@@ -37,11 +37,13 @@ void UDestructionComponent::ApplyDestructionForce(FVector WorldLocation, float M
 
     if (GeoCollection)
     {
-        // Instruct the Chaos solver to break internal joints near impact
-        GeoCollection->ApplyExternalImpulse(
-            WorldLocation,
+        // Apply an impulse at the impact point to break internal Chaos joints near it.
+        // AddImpulseAtLocation is inherited from UPrimitiveComponent and works with
+        // the Chaos solver; more fine-grained per-fragment fracturing can be wired up
+        // via an AFieldSystemActor in a Blueprint child class.
+        GeoCollection->AddImpulseAtLocation(
             (Owner->GetActorLocation() - WorldLocation).GetSafeNormal() * Magnitude,
-            Radius
+            WorldLocation
         );
     }
 

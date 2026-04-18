@@ -9,9 +9,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "NiagaraFunctionLibrary.h"
-#include "Physics/Experimental/PhysScene_Chaos.h"
-#include "PhysicsField/PhysicsFieldComponent.h"
-#include "Field/FieldSystemObjects.h"
 
 UCombatComponent::UCombatComponent()
 {

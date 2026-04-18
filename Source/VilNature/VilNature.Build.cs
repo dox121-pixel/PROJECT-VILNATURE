@@ -39,7 +39,6 @@ public class VilNature : ModuleRules
             "ChaosVehicles",
             "HairStrandsCore",
             "AnimGraphRuntime",
-            "ControlRig",
         });
 
         // Enable RTTI for dynamic_cast use in AI/dialogue systems
