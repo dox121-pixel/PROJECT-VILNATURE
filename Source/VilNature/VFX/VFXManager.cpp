@@ -1,6 +1,7 @@
 // VFXManager.cpp
 #include "VFX/VFXManager.h"
 
+#include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Materials/MaterialParameterCollectionInstance.h"
 #include "Materials/MaterialParameterCollection.h"
