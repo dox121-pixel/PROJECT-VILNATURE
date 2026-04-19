@@ -83,11 +83,11 @@ void AVilNatureCharacter::Tick(float DeltaTime)
 
 // ─── Input setup ──────────────────────────────────────────────────────────────
 
-void AVilNatureCharacter::SetupPlayerInputComponent(UInputComponent* InputComponent)
+void AVilNatureCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-    Super::SetupPlayerInputComponent(InputComponent);
+    Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-    UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(InputComponent);
+    UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(PlayerInputComponent);
     if (!EIC) return;
 
     EIC->BindAction(IA_Move,        ETriggerEvent::Triggered, this, &AVilNatureCharacter::Move);
