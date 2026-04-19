@@ -8,6 +8,9 @@ public class VilNature : ModuleRules
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
+        // Add the module root so subdirectory-qualified includes (e.g. "Combat/CombatComponent.h") resolve correctly
+        PublicIncludePaths.Add(ModuleDirectory);
+
         PublicDependencyModuleNames.AddRange(new string[]
         {
             "Core",
